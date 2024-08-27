@@ -1,0 +1,114 @@
+import React, { useState } from 'react';
+import { Worker, Viewer } from '@react-pdf-viewer/core';
+import * as pdfjsLib from 'pdfjs-dist';
+import '@react-pdf-viewer/core/lib/styles/index.css';
+import { defaultLayoutPlugin } from '@react-pdf-viewer/default-layout';
+import { ChevronLeft, ChevronRight, Download, Plus, Minus, Maximize } from 'lucide-react';
+
+// Set the worker path to pdfjs-dist
+pdfjsLib.GlobalWorkerOptions.workerSrc = `https://unpkg.com/pdfjs-dist@${pdfjsLib.version}/build/pdf.worker.min.js`;
+
+const PdfViewer: React.FC = () => {
+  const [pageNumber, setPageNumber] = useState(1);
+  const [zoom, setZoom] = useState(1);
+  const [isFullscreen, setIsFullscreen] = useState(false);
+
+  // Function to handle zoom in
+  const handleZoomIn = () => {
+    setZoom(prevZoom => prevZoom + 0.1);
+  };
+
+  // Function to handle zoom out
+  const handleZoomOut = () => {
+    setZoom(prevZoom => Math.max(0.1, prevZoom - 0.1));
+  };
+
+  // Function to handle fullscreen toggle
+  const handleFullscreenToggle = () => {
+    if (!document.fullscreenElement) {
+      document.documentElement.requestFullscreen();
+      setIsFullscreen(true);
+    } else {
+      if (document.exitFullscreen) {
+        document.exitFullscreen();
+      }
+      setIsFullscreen(false);
+    }
+  };
+
+  return (
+    <div className={`tw-h-[600px] tw-w-[900px] tw-overflow-hidden ${isFullscreen ? 'tw-fixed tw-top-0 tw-left-0 tw-z-50 tw-h-screen tw-w-screen' : ''}`}>
+      {/* Custom Header Section */}
+      <div className="tw-flex tw-justify-between tw-items-center tw-mb-2 tw-bg-[#BDBDBD]">
+        {/* Pagination controls */}
+        <div className="tw-flex tw-items-center tw-gap-2 tw-ml-3">
+          <button
+            className="tw-px-4 tw-py-2 tw-rounded-md tw-disabled:opacity-50"
+            aria-label="Previous Page"
+            onClick={() => setPageNumber(prevPage => Math.max(prevPage - 1, 1))}
+            disabled={pageNumber <= 1}
+          >
+            <ChevronLeft />
+          </button>
+          <span>Page 1 of {pageNumber}</span>
+          <button
+            className="tw-px-4 tw-py-2 tw-rounded-md tw-disabled:opacity-50"
+            aria-label="Next Page"
+            onClick={() => setPageNumber(prevPage => prevPage + 1)}
+          >
+            <ChevronRight />
+          </button>
+        </div>
+
+        <div className="tw-flex tw-justify-center tw-items-center tw-space-x-3 tw-mr-7">
+          <button
+            className="tw-text-lg tw-cursor-pointer"
+            onClick={handleZoomIn}
+          >
+            <Plus />
+          </button>
+          <button
+            className="tw-text-lg tw-cursor-pointer"
+            onClick={handleZoomOut}
+          >
+            <Minus />
+          </button>
+          <button
+            className="tw-text-lg tw-cursor-pointer"
+            onClick={handleFullscreenToggle}
+          >
+            <Maximize />
+          </button>
+        </div>
+
+        <div className="tw-flex tw-items-center tw-gap-2">
+          <a
+            href="/awt.pdf" 
+            download="awt.pdf" 
+            className="tw-text-lg tw-cursor-pointer"
+            aria-label="Download PDF"
+          >
+            <Download className="tw-h-5 tw-w-5 tw-mr-2" />
+          </a>
+        </div>
+      </div>
+
+      {/* PDF Viewer */}
+      <div
+        className="tw-h-[calc(100%-4rem)] tw-w-full tw-bg-[#F0F0F0] tw-mt-[-8px]"
+        style={{ transform: `scale(${zoom})`, transformOrigin: '0 0' }}
+      >
+        <Worker workerUrl={`https://unpkg.com/pdfjs-dist@${pdfjsLib.version}/build/pdf.worker.min.js`}>
+          <Viewer
+            fileUrl="/awt.pdf"
+            // No default layout plugin
+            // plugins={[defaultLayoutPluginInstance]}
+            onPageChange={({ currentPage }) => setPageNumber(currentPage)}
+          />
+        </Worker>
+      </div>
+    </div>
+  );
+};
+
+export default PdfViewer;
