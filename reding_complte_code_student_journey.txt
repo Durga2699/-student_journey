@@ -1,0 +1,289 @@
+import React, { useState } from 'react';
+import { Worker, Viewer } from '@react-pdf-viewer/core';
+import * as pdfjsLib from 'pdfjs-dist';
+import '@react-pdf-viewer/core/lib/styles/index.css';
+import { defaultLayoutPlugin } from '@react-pdf-viewer/default-layout';
+import { ChevronLeft, ChevronRight, Download, Plus, Minus, Maximize ,Circle ,Triangle} from 'lucide-react';
+import { Button } from "@/components/ui/button"
+import { Card } from '@/components/ui/card';
+import { Accordion, AccordionContent, AccordionItem, AccordionTrigger } from '@/components/ui/accordion';
+import { Bold, Italic, Underline, Code, AlignLeft, AlignCenter, AlignRight, Paperclip, Undo, Redo,Images } from "lucide-react";
+
+import { FileText ,CircleCheck,X } from 'lucide-react';
+import {
+  AlertDialog,
+  AlertDialogAction,
+  AlertDialogCancel,
+  AlertDialogContent,
+  AlertDialogDescription,
+  AlertDialogFooter,
+  AlertDialogHeader,
+  AlertDialogTitle,
+  AlertDialogTrigger,
+} from "@/components/ui/alert-dialog"
+
+// Set the worker path to pdfjs-dist
+pdfjsLib.GlobalWorkerOptions.workerSrc = `https://unpkg.com/pdfjs-dist@${pdfjsLib.version}/build/pdf.worker.min.js`;
+
+const PdfViewer: React.FC = () => {
+  const [pageNumber, setPageNumber] = useState(1);
+  const [zoom, setZoom] = useState(1);
+  const [isFullscreen, setIsFullscreen] = useState(false);
+
+  // Function to handle zoom in
+  const handleZoomIn = () => {
+    setZoom(prevZoom => prevZoom + 0.1);
+  };
+
+  // Function to handle zoom out
+  const handleZoomOut = () => {
+    setZoom(prevZoom => Math.max(0.1, prevZoom - 0.1));
+  };
+
+  // Function to handle fullscreen toggle
+  const handleFullscreenToggle = () => {
+    if (!document.fullscreenElement) {
+      document.documentElement.requestFullscreen();
+      setIsFullscreen(true);
+    } else {
+      if (document.exitFullscreen) {
+        document.exitFullscreen();
+      }
+      setIsFullscreen(false);
+    }
+  };
+
+  const [isDialogOpen, setIsDialogOpen] = useState(false);
+
+    const openAlertDialog = () => setIsDialogOpen(true);
+    const closeAlertDialog = () => setIsDialogOpen(false);
+
+  return (
+    <Card  className='tw-h-[1200px]' >
+      
+      <div className="tw-flex tw-items-center tw-w-full  tw-shadow-sm tw-p-2 tw-mb-4  tw-ml-10">
+      <img src="/public/ellipse (2).png" alt="icon" className="tw-w-9 tw-h-9 tw-mr-1 tw-ml-[-30px]" />
+        <span className="tw-text-sm tw-font-medium tw-text-black">
+          Program: Java Full Stack / Course: Programming Fundamentals
+        </span>
+        <Button className="tw-flex tw-items-center tw-bg-green-600 tw-w-[147px] tw-h-[28px] tw-px-2  tw-ml-[550px]">
+       <div className='tw-text-[10px] '>Launch platform</div>
+       </Button>
+       </div>
+    <div className="tw-ml-8">
+  <p>Module 1: Basics of HTML / Reading Material : Intro to HTML</p>
+</div>
+     
+    <div className={`tw-h-[600px] tw-ml-[140px] tw-w-[900px] tw-mt-7 tw-border tw-border-gray-400 tw-bg-gray-400   tw-overflow-hidden ${isFullscreen ? 'tw-fixed tw-top-0 tw-left-0 tw-z-50 tw-h-screen tw-w-screen' : ''}`}>
+      {/* Custom Header Section */}
+      <div className="tw-flex tw-justify-between tw-items-center tw-mb-2 tw-bg-[#BDBDBD] ">
+        {/* Pagination controls */}
+        <div className="tw-flex tw-items-center tw-gap-2 tw-ml-3">
+          <button
+            className="tw-px-4 tw-py-2 tw-rounded-md tw-disabled:opacity-50"
+            aria-label="Previous Page"
+            onClick={() => setPageNumber(prevPage => Math.max(prevPage - 1, 1))}
+            disabled={pageNumber <= 1}
+          >
+            <ChevronLeft />
+          </button>
+          <span>Page 1 of {pageNumber}</span>
+          <button
+            className="tw-px-4 tw-py-2 tw-rounded-md tw-disabled:opacity-50"
+            aria-label="Next Page"
+            onClick={() => setPageNumber(prevPage => prevPage + 1)}
+          >
+            <ChevronRight />
+          </button>
+        </div>
+
+        <div className="tw-flex tw-justify-center tw-items-center tw-space-x-3 tw-mr-7">
+          <button
+            className="tw-text-lg tw-cursor-pointer"
+            onClick={handleZoomIn}
+          >
+            <Plus />
+          </button>
+          <button
+            className="tw-text-lg tw-cursor-pointer"
+            onClick={handleZoomOut}
+          >
+            <Minus />
+          </button>
+          <button
+            className="tw-text-lg tw-cursor-pointer"
+            onClick={handleFullscreenToggle}
+          >
+            <Maximize />
+          </button>
+        </div>
+
+        <div className="tw-flex tw-items-center tw-gap-2">
+          <a
+            href="/awt.pdf" 
+            download="awt.pdf" 
+            className="tw-text-lg tw-cursor-pointer"
+            aria-label="Download PDF"
+          >
+            <Download className="tw-h-5 tw-w-5 tw-mr-8" />
+          </a>
+        </div>
+      </div>
+
+      {/* PDF Viewer */}
+      <div
+  className="tw-h-[calc(100%-4rem)] tw-w-full tw-bg-custom-grey tw-mt-[-8px]"
+  style={{ transform: `scale(${zoom})`, transformOrigin: '0 0' }}
+>
+  <Worker workerUrl={`https://unpkg.com/pdfjs-dist@${pdfjsLib.version}/build/pdf.worker.min.js`}>
+    <Viewer
+      fileUrl="/awt.pdf"
+      onPageChange={({ currentPage }) => setPageNumber(currentPage)}
+    />
+  </Worker>
+</div>
+</div>
+
+<Accordion
+    type="single"
+    collapsible
+    className="tw-w-[910px] tw-h-auto tw-gap-[8px] tw-rounded-[4px] tw-bg-[#E9FAEB] tw-ml-[136px]  tw-mt-4"
+  >
+    <AccordionItem value="item" className="tw-border-none tw-h-full tw-mr-30">
+    <AccordionTrigger className="tw-flex tw-items-center tw-justify-between tw-h-full tw-px-4 tw-ml-5">
+  <div className="tw-flex tw-items-center">
+    <Triangle className="tw-h-4 tw-w-4 tw-mr-[-3px] tw-ml-[-2] tw-bg-[#E1BE46]   " />
+    <span className="tw-font-montserrat  tw-text-[14px] tw-font-[500] tw-leading-[24px]">
+      Note: First note
+    </span>
+  </div>
+</AccordionTrigger>
+
+      <AccordionContent className="tw-flex tw-items-center tw-h-full tw-px-4">
+        <span className="tw-flex tw-items-center">
+        <div className="tw-inline-flex tw-items-center tw-justify-center tw-bg-yellow-500 tw-rounded-full tw-p-1">
+      <Circle className="tw-h-4 tw-w-4 tw-text-transparent" />
+     
+    </div>
+          <div className="tw-ml-4">Lorem Ipsum is simply dummy text of the printing </div>
+           <Circle className="tw-h-4 tw-w-4 tw-text-transparent" />
+        </span>
+      </AccordionContent>
+      <AccordionContent className="tw-flex tw-items-center tw-h-full tw-px-4">
+        <span className="tw-flex tw-items-center">
+        <div className="tw-inline-flex tw-items-center tw-justify-center tw-bg-yellow-500 tw-rounded-full tw-p-1">
+      <Circle className="tw-h-4 tw-w-4 tw-text-transparent" />
+    </div>
+          <div className="tw-ml-4">
+          Lorem Ipsum is simply dummy text of the printing 
+          </div>
+        </span>
+      </AccordionContent>
+      <AccordionContent className="tw-flex tw-items-center tw-h-full tw-px-4">
+        <span className="tw-flex tw-items-center">
+        <div className="tw-inline-flex tw-items-center tw-justify-center tw-bg-yellow-500 tw-rounded-full tw-p-1">
+      <Circle className="tw-h-4 tw-w-4 tw-text-transparent" />
+    </div>
+          <div className="tw-ml-4">   Lorem Ipsum is simply dummy text of the printing </div>
+        </span>
+      </AccordionContent>
+    </AccordionItem>
+  </Accordion>
+
+  <p  className="tw-w-[1002px] tw-p-2  tw-ml-[136px]  tw-mt-3 "> Keep Notes  </p>
+
+
+  <div className="tw-flex tw-items-center tw-p-2 tw-space-x-2 tw-bg-gray-100 border border-gray-300 rounded tw-w-[910px] tw-ml-[136px] ">
+      <img src="/a.png" className="tw-h-[20px] tw-w-[20px]  tw-mr-2" />
+      <img src="/group.png" className="tw-h-[20px] tw-w-[20px]  tw-mr-2" />
+      <img src="/Vector (1).png" className="tw-h-[20px] tw-w-[20px]   " /> 
+        <button className="p-2 hover:bg-gray-200 tw-mr-2">
+          <Bold className="w-4 h-4" />
+        </button>
+        <button className="p-2 hover:bg-gray-200 tw-mr-2">
+          <Italic className="w-4 h-4" />
+        </button>
+        <button className="p-2 hover:bg-gray-200 tw-mr-2">
+          <Underline className="w-4 h-4" />
+        </button>
+        <button className="p-2 hover:bg-gray-200">
+          <Code className="w-4 h-4" />
+        </button>
+        <button className="p-2 hover:bg-gray-200">
+          <AlignLeft className="w-4 h-4" />
+        </button>
+        <button className="p-2 hover:bg-gray-200">
+          <AlignCenter className="w-4 h-4" />
+        </button>
+        <button className="p-2 hover:bg-gray-200">
+          <AlignRight className="w-4 h-4" />
+        </button>
+        <button className="p-2 hover:bg-gray-200">
+          <Paperclip className="w-4 h-4" />
+        </button>
+         <button className="p-2 hover:bg-gray-200">
+          <Images className="w-4 h-4" />
+        </button>
+      </div>
+      <textarea
+  placeholder="Drag and drop files here or add text."
+  className="tw-w-[910px] p-2 tw-bg-white tw-border tw-border-[#BDBDBD] tw-mt-30 tw-ml-[136px]"
+  rows={6}
+/>
+
+<div className="flex items-center justify-between tw-mt-2">
+        <span className="text-gray-500 tw-ml-[136px]">Word count: 0</span>
+        <Button 
+        className="  tw-bg-blue-500 tw-ml-[990px]  tw-mb-[-20px] tw-text-white tw-px-3 tw-py-2 tw-rounded" 
+        variant="default"
+        onClick={openAlertDialog}
+      >
+        Save
+      </Button>
+
+      <AlertDialog open={isDialogOpen} onOpenChange={setIsDialogOpen}>
+        <AlertDialogTrigger asChild>
+          {/* Optional trigger component */}
+        </AlertDialogTrigger>
+        <AlertDialogContent className="tw-w-[355px] tw-h-[228px] tw-box-border-none">
+          <div className="tw-absolute tw-top-0 tw-right-0 tw-p-2">
+            <AlertDialogCancel className='tw-border-none'>
+            <X className="tw-w-[15px] tw-h-[15px] tw-border-white !tw-border-none" />
+          </AlertDialogCancel>
+          </div>
+          <AlertDialogHeader className="tw-text-center">
+            <div className="tw-text-green-500 tw-flex tw-justify-center">
+              <CircleCheck className="tw-w-[66px] tw-h-[50px]" />
+            </div>
+            <div className="tw-flex tw-justify-center tw-mb-8">
+              <AlertDialogTitle>
+                <span className="tw-font-montserrat tw-font-semibold tw-text-[14px] tw-text-center">
+                  Completed
+                </span>
+              </AlertDialogTitle>
+            </div>
+          </AlertDialogHeader>
+          <AlertDialogDescription>
+            <div className="tw-flex tw-flex-col tw-mt-15 tw-px-6 tw-py-2 !tw-border-primary tw-w-full tw-rounded-[10px] tw-whitespace-nowrap">
+            Your assignment has been successfully submitted.
+            </div>
+          </AlertDialogDescription>
+          <div className="tw-flex tw-justify-center tw-mb-20">
+            <Button 
+              className="tw-bg-primary tw-w-[150px] tw-rounded tw-text-white"
+              onClick={closeAlertDialog}
+            >
+              Continue
+            </Button>
+          </div>
+        </AlertDialogContent>
+      </AlertDialog>
+       </div>
+
+
+
+    </Card>
+  );
+};
+
+export default PdfViewer;
